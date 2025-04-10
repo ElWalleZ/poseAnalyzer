@@ -1,3 +1,8 @@
+"""
+Este módulo permite analizar la postura de una persona en una imagen utilizando MediaPipe y comparar sus coordenadas
+con la base de datos de posturas previamente registradas para clasificarla.
+"""
+
 import cv2
 import mediapipe as mp
 import pandas as pd
@@ -15,10 +20,15 @@ mp_pose = mp.solutions.pose
 
 def analizar_pose(frame):
     """
-    Recibe: frame (BGR)
-    Retorna: estado_predicho (str)
+    Analiza un frame (imagen) y clasifica la postura de la persona detectada.
+
+    Parámetros:
+    - frame (numpy.ndarray): Imagen en formato BGR (de OpenCV).
+
+    Retorna:
+    - str: Estado o postura predicha.
     """
-    with mp_pose.Pose() as pose:  # ✅ cada hilo crea su propia instancia
+    with mp_pose.Pose() as pose:
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(image)
 

@@ -1,21 +1,38 @@
+"""
+Este script detecta personas usando YOLOv8 y analiza su postura
+con MediaPipe Pose. El análisis se hace de forma paralela
+para cada persona detectada, respetando un límite máximo de personas.
+"""
+
 import threading
 import time
 import cv2
 from ultralytics import YOLO
 from clasificador import analizar_pose
 
-modelo = YOLO('yolov8n.pt')  # Modelo ligero
-MAX_PERSONAS = 5
+modelo = YOLO('yolov8n.pt')
+
+MAX_PERSONAS = 5 #Número de personas a analizar simultáneamente
 cap = cv2.VideoCapture(0)
 
 personas_info = {}
-
 analisis_en_progreso = {}
 
 frame_count = 0
-FRAMES_ENTRE_ANALISIS = 10
+
+FRAMES_ENTRE_ANALISIS = 10 # Cada cuántos frames analizar la pose
+
 
 def hilo_analisis_pose(persona_id, recorte):
+    """
+    Función que ejecuta el análisis de pose en un hilo independiente.
+
+    Parámetros:
+    persona_id (int): ID de la persona detectada por YOLO.
+    recorte (numpy.ndarray): Imagen recortada de la persona.
+
+    Este hilo analiza la postura y actualiza el estado en personas_info.
+    """
     estado = analizar_pose(recorte)
     personas_info[persona_id]["estado"] = estado
     analisis_en_progreso[persona_id] = None
@@ -55,7 +72,7 @@ while True:
 
         personas_detectadas += 1
 
-    for persona_id in list(personas_info.keys()):
+    for persona_id in list(personas_info.keys()): # Eliminar personas que ya no están
         if persona_id not in personas_actuales:
             personas_info.pop(persona_id)
             analisis_en_progreso.pop(persona_id, None)
